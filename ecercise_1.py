@@ -80,10 +80,11 @@ class datagen:
         self.data_comb=pd.concat({"dataset_1":self.dataset1,"dataset_2":self.dataset2},axis=1)#,keys=['Dataset 1', 'Dataset 2'], axis=0)
         self.data_comb.to_csv('exercise_1_data.csv')
         plt.figure(figsize=(15,6))
-        plt.scatter(self.dataset1.iloc[:,0],self.dataset1.iloc[:,1],label="random data after curve",color="red",alpha=0.5)
-        plt.scatter(self.dataset2.iloc[:,0],self.dataset2.iloc[:,1],label="random 2d data",color="blue",alpha=0.5)
+        plt.scatter(self.dataset1.iloc[:,0],self.dataset1.iloc[:,1],label="dataset1",color="red",alpha=0.5)
+        plt.scatter(self.dataset2.iloc[:,0],self.dataset2.iloc[:,1],label="dataset2",color="blue",alpha=0.5)
         plt.title("combined plot")
         plt.legend()
+        plt.savefig('combined_data.jpeg')
         plt.show()
         return
 
