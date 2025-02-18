@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[136]:
+# In[327]:
 
 
 #Excercise 2
 #Author - Erik William Ravndal
 
 
-# In[137]:
+# In[328]:
 
 
 import sklearn.metrics as skm
@@ -22,7 +22,7 @@ import pandas as pd
 import timeit as it
 
 
-# In[138]:
+# In[329]:
 
 
 #1 Task
@@ -66,7 +66,7 @@ for mse, mse_type, time in zip([mse_vanilla, mse_numpy, sk_mse],['vanilla', 'num
     print("Task completed sucessfully")
 
 
-# In[139]:
+# In[330]:
 
 
 #Task 2
@@ -98,14 +98,14 @@ class task2:
         return self.dataset
 
 
-# In[140]:
+# In[331]:
 
 
 a=task2(npoints=300,freq=0.01,timestart=0,timestop=100,amplitude=9)
 dataset=a.oneDimoscillatory()
 
 
-# In[141]:
+# In[332]:
 
 
 #Task 3: Data Clustering
@@ -183,7 +183,7 @@ class kmean_cluster:
         
 
 
-# In[142]:
+# In[333]:
 
 
 #Task 3: Data Clustering Output:
@@ -199,7 +199,7 @@ print("Selected method for initiation of k-means was randomized centroids althou
 
 
 
-# In[323]:
+# In[366]:
 
 
 #Task 4: LR NN PINN - regression of dataset:
@@ -244,9 +244,6 @@ class regression:
         y=self.data["noisy_data"].values
         x_2=x.reshape(-1,1)
         #after some trial and error it appears that as I adjusted the number of parameters and adaptive training step and using the tanh and adam activation function were sufficent
-        reg2=MLPRegressor(activation="tanh",learning_rate="adaptive",solver="adam",max_iter=max_N)
-        reg2.fit(x_2,y)
-        y_2=reg2.predict(x_2)
         for i in range (100,max_N+1,100):
             if i%100==0:
                 reg2=MLPRegressor(activation="tanh",learning_rate="adaptive",solver="adam",max_iter=i)
@@ -311,19 +308,57 @@ class regression:
         
         return
     
-    def error_estimate(self):
+    #Task 7:
+    def error_estimate(self,max_N):
+        #we will here split the datgaset into two categories - training and test:
+        self.NN_out=pd.DataFrame()
+        x=self.data["time"].values
+        y=self.data["noisy_data"].values
+        N=len(x)
+        #splitting the data into the following: training and test dataset - in order to quantify deviance of the model relative to data:
+        #NOTE: Experience with this kind of work on unsupervised models in a monitoring environment has led to overfitting and underpeformance...
+        n_train=int((N/100)*70)
         
+        #owing to the nature of the dataset (timeseries) - the dataset must be sampled along the time axis
+        x_train=x[:n_train]
+        x_test=x[n_train:]
+        y_train=y[:n_train]
+        y_test=y[n_train:]
+        
+        #convert into usable format (2D array)
+        x_2te=x_test.reshape(-1,1)
+        x_2tr=x_train.reshape(-1,1)
+        
+        #after some trial and error it appears that as I adjusted the number of parameters and adaptive training step and using the tanh and adam activation function were sufficent
+        iterations=[]
+        R2_score=[]
+        
+        for i in range (100,max_N+1,100):
+            if i%100==0:
+                iterations.append(i)
+                reg2=MLPRegressor(activation="tanh",learning_rate="adaptive",solver="adam",max_iter=i)
+                reg2.fit(x_2tr,y_train)
+                reg2.predict(x_2te)
+                r2=reg2.score(x_2te,y_test)
+                R2_score.append(r2)
+        plt.figure(figsize=(15,6))
+        plt.plot(iterations,R2_score,color="red",label="Residual")
+        plt.ylabel("Residual [R^2]")
+        plt.xlabel("iterations")
+        plt.legend()
+        plt.show()
         return
         
 
 
-# In[324]:
+# In[367]:
 
 
+#initializing with dataset from Task 1.
 c=regression(data=dataset)
 
 
-# In[325]:
+# In[368]:
 
 
 #Task 4: LR NN PINN - regression of dataset (output):
@@ -332,11 +367,19 @@ c.linreg()
 c.NeuralNet(500)
 
 
-# In[326]:
+# In[369]:
 
 
 #Task 6 output:
 c.true_error()
+print("The only really interesting value is the residual score per iteration as that would indicate the total performance of the model relative to the totality of the actual dataset")
+
+
+# In[373]:
+
+
+#Task 7 output:
+c.error_estimate(500)
 
 
 # In[ ]:
